@@ -107,7 +107,7 @@ def main(root: str, output: Optional[str] = None, labels=None, label_type: str =
 
             # data = [min_x, min_y, max_x, max_y]
             data = [x1, y1, x2, y2]
-            print(f'src:{data}')
+            # print(f'src:{data}')
 
             bbox = []
             if label_type == 'xyxy':
@@ -116,13 +116,13 @@ def main(root: str, output: Optional[str] = None, labels=None, label_type: str =
                 bbox = xywh2yolo(data, [image_w, image_h])
 
             temp = cxcywh2xyxy(bbox, [image_w, image_h])
-            print(f're: {temp}')
+            # print(f're: {temp}')
             txt_file.write(str(index) + " " + " ".join([str(a) for a in bbox]) + '\n')
         txt_file.close()
 
 
 if __name__ == "__main__":
-    root = r'D:\llf\dataset\danyang\B\dataset\train\img-crop'
+    root = r''
     labels = find_labels(root)
     print(f'labels: {labels}')
     main(root, None, labels)

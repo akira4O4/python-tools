@@ -11,8 +11,8 @@ from utils import get_images, load_yaml
 
 
 def check_dir(
-        dir_path: str,
-        clean: Optional[bool] = False
+    dir_path: str,
+    clean: Optional[bool] = False
 ) -> None:
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -25,9 +25,9 @@ def check_dir(
 
 
 def copy_image(
-        images: List[str],
-        output: str,
-        mode: Optional[str] = 'copy'
+    images: List[str],
+    output: str,
+    mode: Optional[str] = 'copy'
 ) -> None:
     for image in tqdm(images):
         if mode == 'copy':
@@ -37,9 +37,9 @@ def copy_image(
 
 
 def split_data(
-        images: List[str],
-        ratio: List[float],
-        output_paths: List[str]
+    images: List[str],
+    ratio: List[float],
+    output_paths: List[str]
 ) -> None:
     num_of_images = len(images)
     if num_of_images == 0:
@@ -55,18 +55,18 @@ def split_data(
     test_sublist = images[train_offset + val_offset:]
     train_path, val_path, test_path = output_paths[0], output_paths[1], output_paths[2],
     for sublist, output_path in zip(
-            [train_sublist, val_sublist, test_sublist],
-            [train_path, val_path, test_path]
+        [train_sublist, val_sublist, test_sublist],
+        [train_path, val_path, test_path]
     ):
         copy_image(sublist, output_path)
 
 
 def main(
-        root: str,
-        output: Optional[str] = None,
-        ratio: List[float] = None,
-        labels: Optional[List[str]] = None,
-        clear_output: Optional[bool] = True
+    root: str,
+    output: Optional[str] = None,
+    ratio: List[float] = None,
+    labels: Optional[List[str]] = None,
+    clear_output: Optional[bool] = True
 ) -> None:
     if not os.path.exists(root):
         logger.error(f'Path: {root} is not exists.')
@@ -134,7 +134,7 @@ def main(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--config', type=str, default=r'D:\llf\code\pytorch-lab\configs\splite_train_val_test.yaml',
+        '--config', type=str, default=r'',
         help='CONFIG path'
     )
     parser.add_argument(

@@ -12,6 +12,20 @@ from utils import check_dir, round3
 from box import Location, Box, Detection
 
 
+def xyxy2xywh(xyxy: List[int]) -> List[int]:  # noqa
+    x1, y1, x2, y2 = xyxy
+    w = x2 - x1
+    h = y2 - y1
+    return [x1, y1, w, h]
+
+
+def xywh2xyxy(xywh: List[int]) -> List[int]:  # noqa
+    x, y, w, h = xywh
+    x2 = x + w
+    y2 = y + h
+    return [x, y, x2, y2]
+
+
 def softmax(x: np.ndarray) -> np.ndarray:
     e_x = np.exp(x)
     y = e_x / np.sum(e_x)
@@ -147,6 +161,7 @@ def fuse_image(
     img_fuse = cv2.addWeighted(img, 0.3, mask, 0.5, 0)
     shutil.copy(img_path, save)
     cv2.imwrite(os.path.join(save, name + '_seg.jpg'), img_fuse)
+
 
 def draw(
         batch_detection: List[Detection],
@@ -289,45 +304,45 @@ def yolov8_postprocess(  # noqa
     return batch_detection
 
 
-# TODO:No Testing
 def yolov10_postprocess(
-        feats: List[np.ndarray],
-        conf: float = 0.25,
-        reg_max: int = 16
-) -> Tuple[List, List, List]:
-    dfl = np.arange(0, reg_max, dtype=np.float32)
-    feats = [feat[0] for feat in feats]
-    scores_proposals = []
-    boxes_proposals = []
-    labels_proposals = []
+        outputs: np.ndarray,
+        batch_image_path: List[str],
+        input_wh: List[int],
+        image_wh: List[int],
+        conf: Optional[float] = 0.5
+) -> List[Detection]:
+    x_factor: float = image_wh[0] / input_wh[0]
+    y_factor: float = image_wh[1] / input_wh[0]
 
-    for i in range(3):
-        stride = 8 << i
-        score_feat = feats[i][..., :80]
-        bbox_feat = feats[i][..., 80:]
+    batch_detection: List[Detection] = []
+    for bs in range(outputs.shape[0]):
+        image_path = batch_image_path[bs]
+        output: np.ndarray = outputs[bs]
 
-        hIdx, wIdx, cIdx = np.where(score_feat > conf)
-        num_proposals = hIdx.size
-        if not num_proposals:
-            continue
+        rows, cols = output.shape
 
-        scores = score_feat[hIdx, wIdx, cIdx]
-        boxes = bbox_feat[hIdx, wIdx].reshape(-1, 4, reg_max)
-        boxes = softmax(boxes, -1) @ dfl
+        detection = Detection()
+        detection.image = image_path
 
-        for k in range(num_proposals):
-            h, w = hIdx[k], wIdx[k]
-            score = scores[k]
-            label = cIdx[k]
-            x1, y1, x2, y2 = boxes[k]
+        for i in range(rows):
+            score = round3(output[i, 4])
 
-            x1 = (w + 0.5 - x1) * stride
-            y1 = (h + 0.5 - y1) * stride
-            x2 = (w + 0.5 + x2) * stride
-            y2 = (h + 0.5 + y2) * stride
+            if score >= conf:
+                left, top = output[i][0].item(), output[i][1].item()
+                right, bottom = output[i][2].item(), output[i][3].item()
 
-            scores_proposals.append(score)
-            boxes_proposals.append(np.array([x1, y1, x2, y2], dtype=np.float32))
-            labels_proposals.append(label)
+                x1 = int(left * x_factor)
+                y1 = int(top * y_factor)
+                x2 = int(right * x_factor)
+                y2 = int(bottom * y_factor)
 
-    return boxes_proposals, scores_proposals, labels_proposals
+                xywh = xyxy2xywh([x1, y1, x2, y2])
+
+                box = Box(
+                    Location(*xywh),
+                    score=score,
+                    label_id=int(output[i, 5])
+                )
+                detection.boxes.append(box)
+        batch_detection.append(detection)
+    return batch_detection

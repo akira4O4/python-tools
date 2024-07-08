@@ -6,8 +6,8 @@ from tqdm import tqdm
 
 if __name__ == '__main__':
     random_rate = 10000
-    root = r'D:\llf\dataset\danyang\2024_dataset\20240327\good-e'
-    output = r'D:\llf\dataset\danyang\2024_dataset\20240327\good-e_output'
+    root = r''
+    output = r''
 
     images = get_images(root)
     images_len = len(images)
