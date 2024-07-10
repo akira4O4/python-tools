@@ -6,32 +6,6 @@ from utils import load_json, get_images
 from tqdm import tqdm
 
 
-def find_labels(root: str) -> list:
-    labels = []
-
-    images = get_images(root)
-    for image in images:
-        basename = os.path.basename(image)
-        name, ext = os.path.splitext(basename)
-        json_file_path = os.path.join(root, basename.replace(ext, '.json'))
-
-        if not os.path.exists(json_file_path):
-            continue
-
-        json_data = load_json(json_file_path)
-        # "shapes": [
-        #     {
-        #         "label": "qipao",
-        #         "points": []
-        #       }
-        # ]
-        for shape in json_data.get("shapes"):
-            if shape["label"] not in labels:
-                labels.append(shape["label"])
-
-    return sorted(labels)
-
-
 def xywh2yolo(box: list, image_wh: list) -> List[int]:
     w, h = image_wh[0], image_wh[1]
     box = np.array(box, dtype=np.float64)
@@ -123,6 +97,9 @@ def main(root: str, output: Optional[str] = None, labels=None, label_type: str =
 
 if __name__ == "__main__":
     root = r''
-    labels = find_labels(root)
+    labels = [
+        '1_A',
+        '2_B'
+    ]
     print(f'labels: {labels}')
     main(root, None, labels)
