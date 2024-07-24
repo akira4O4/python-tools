@@ -1,31 +1,7 @@
 import os
 import cv2
-import json
 from tqdm import tqdm
-
-
-def get_images(path: str, ext=None) -> list:
-    if ext is None:
-        ext = ['.png', '.jpg', '.bmp']
-    data = []
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            file_name, file_ext = os.path.splitext(file)
-            if file_ext in ext:
-                image = os.path.join(root, file)
-                data.append(image)
-    return data
-
-
-def load_json(path: str):
-    with open(path, 'r') as config_file:
-        data = json.load(config_file)  # 配置字典
-    return data
-
-
-def save_json(data, save_path: str, sort=False) -> None:
-    with open(save_path, 'w') as f:
-        f.write(json.dumps(data, indent=4, ensure_ascii=False, sort_keys=sort))
+from utils import get_images, save_json, load_json
 
 
 def main(root: str, output: str, new_suffix: str) -> None:
