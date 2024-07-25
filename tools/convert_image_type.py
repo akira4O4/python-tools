@@ -1,7 +1,8 @@
 import os
 import cv2
+
 from tqdm import tqdm
-from utils import get_images, save_json, load_json
+from utils import get_images, save_json, load_json, imread, imwrite
 
 
 def main(root: str, output: str, new_suffix: str) -> None:
@@ -9,13 +10,12 @@ def main(root: str, output: str, new_suffix: str) -> None:
         os.makedirs(output)
 
     for image in tqdm(get_images(root)):
-        im = cv2.imread(image)
-
+        im = imread(image)
         basename = os.path.basename(image)
         name, suffix = os.path.splitext(basename)
 
         new_image_path = os.path.join(output, name) + new_suffix
-        cv2.imwrite(new_image_path, im)
+        imwrite(new_image_path, im, new_suffix)
 
         json_file = image.replace(suffix, '.json')
         if os.path.exists(json_file):
@@ -26,8 +26,8 @@ def main(root: str, output: str, new_suffix: str) -> None:
 
 
 if __name__ == '__main__':
-    root = r'D:\llf\dataset\danyang\training_data\D2\train\bakcground.1\jpg'
-    output = r'D:\llf\dataset\danyang\training_data\D2\train\bakcground.1\png'
+    root = r'C:\Users\Lee Linfeng\Desktop\temp\你好'
+    output = r'C:\Users\Lee Linfeng\Desktop\temp\output'
     new_suffix = '.png'
 
     main(root, output, new_suffix)

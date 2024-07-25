@@ -6,32 +6,11 @@ from typing import Union, Optional
 
 import cv2
 import numpy as np
+from PIL import Image
 import yaml
 from loguru import logger
 
-__all__ = [
-    'letterbox',
-    'check_exists',
-    'check_dir',
-    'load_json',
-    'load_yaml',
-    'get_time',
-    'get_images',
-    'timer',
-]
 COLOR_LIST = np.random.uniform(0, 255, size=(80, 3))
-
-color_list = [
-    [0, 0, 0],
-    [0, 255, 0], [0, 0, 255], [0, 255, 255],
-    [255, 255, 0], [0, 255, 255], [255, 255, 0],
-    [255, 255, 255], [170, 255, 255],
-    [255, 0, 170], [85, 0, 255], [128, 255, 128],
-    [170, 255, 255], [0, 255, 170], [85, 0, 255],
-    [170, 0, 255], [0, 85, 255], [0, 170, 255],
-    [255, 255, 85], [255, 255, 170], [255, 0, 255],
-    [255, 85, 255], [255, 170, 255], [85, 255, 255],
-]
 
 
 def timer(func):
@@ -48,9 +27,9 @@ def timer(func):
 
 
 def letterbox(
-        image_src: np.ndarray,
-        dst_size: Union[tuple, list],
-        pad_color: Optional[Union[tuple, list]] = (114, 114, 114)
+    image_src: np.ndarray,
+    dst_size: Union[tuple, list],
+    pad_color: Optional[Union[tuple, list]] = (114, 114, 114)
 ) -> tuple:
     src_h, src_w = image_src.shape[:2]
     dst_h, dst_w = dst_size
@@ -128,6 +107,18 @@ def get_time(fmt: str = '%Y%m%d_%H%M%S') -> str:
     return str(time_str)
 
 
+def get_files(path: str, suffix=None) -> list:
+    assert suffix is not None, 'suffix is None.'
+    data = []
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            file_name, file_ext = os.path.splitext(file)
+            if file_ext in suffix:
+                image = os.path.join(root, file)
+                data.append(image)
+    return data
+
+
 def get_images(path: str, ext=None) -> list:
     if ext is None:
         ext = ['.png', '.jpg', '.bmp']
@@ -139,3 +130,12 @@ def get_images(path: str, ext=None) -> list:
                 image = os.path.join(root, file)
                 data.append(image)
     return data
+
+
+def imread(path: str) -> np.ndarray:
+    img = Image.open(path)
+    return np.asarray(img)
+
+
+def imwrite(path: str, image: np.ndarray, suffix: str = '.jpg') -> None:
+    cv2.imencode(suffix, image)[1].tofile(path)
