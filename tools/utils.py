@@ -80,7 +80,7 @@ def round3(x: Union[float, np.float64]) -> float:
 def save_json(data: Union[dict, list], output: str, sort: Optional[bool] = False) -> None:
     with open(output, 'w') as f:
         f.write(json.dumps(data, indent=4, ensure_ascii=False, sort_keys=sort))
-    logger.info(f'Save Json File in: {output}.')
+    # logger.info(f'Save Json File in: {output}.')
 
 
 def save_yaml(data: dict, output: str, sort: Optional[bool] = False) -> None:
